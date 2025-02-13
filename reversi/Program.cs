@@ -11,6 +11,7 @@
 namespace reversi;
 class Program {
     static void Main(String[] args) {
+        Console.Clear();
 
         /*
             Si les esto ney, falta agregar una que otra validdacion
@@ -29,14 +30,17 @@ class Program {
         string[] nombres = new string[2];
         string[,] tablero = new string[8, 8];
         
-        for (int i = 0; i < 2; i++) {
-            Console.Write($"Ingresa el nombre del jugador {i + 1}: ");
-            nombres[i] = Console.ReadLine();
-            Console.WriteLine($"{nombres[i]}, selecciona un color: ");
-            PrintColors(colors);
-            Console.Write("> ");
-            colorJugadores[i] = colors[Int32.Parse(Console.ReadLine()) + 1];
-        }
+        // for (int i = 0; i < 2; i++) {
+        //     Console.Write($"Ingresa el nombre del jugador {i + 1}: ");
+        //     nombres[i] = Console.ReadLine();
+        //     Console.WriteLine($"{nombres[i]}, selecciona un color: ");
+        //     PrintColors(colors);
+        //     Console.Write("> ");
+        //     colorJugadores[i] = colors[Int32.Parse(Console.ReadLine()) -1];
+        // }
+
+        nombres = ["pepe", "tilin"];
+        colorJugadores = [colors[0], colors[1]];
 
         InicializarTablero(tablero);
 
@@ -51,7 +55,6 @@ class Program {
             PrintTable(tablero, colorJugadores);
 
             PedirCoordenadas(tablero, jugadorActual, colorJugadores);
-            //Reversi(Tablero)
             jugadorActual = (jugadorActual+1) % 2;                                         
     
             juegoTerminado = !HayMovimientosDisponibles(tablero);
@@ -77,12 +80,19 @@ class Program {
         }
     }
 
-    /* E S T O  Y A  V A  J A L A N D O  B I E N */
     static void InicializarTablero(string[,] tablero) {
-        tablero[3, 3] = "X";
+        tablero[3, 1] = "X";
+        tablero[3, 2] = "O";
+        tablero[3, 3] = "O";
         tablero[3, 4] = "O";
-        tablero[4, 3] = "O";
-        tablero[4, 4] = "X";
+        tablero[3, 5] = "O";
+        tablero[3, 7] = "X";
+
+        tablero[0,3] = "X";
+        tablero[1,3] = "O";
+        tablero[2,3] = "O";
+
+
     }
     static void PrintTable(string[,] tablero, ConsoleColor[] colorJugadores) {
         
@@ -96,9 +106,9 @@ class Program {
 
 
                 if (tablero[i, j] == "X") 
-                    ImprimirColor("0", colorJugadores[0]);
+                    ImprimirColor("X", colorJugadores[0]);
                 else if (tablero[i, j] == "O")
-                    ImprimirColor("0", colorJugadores[1]);
+                    ImprimirColor("O", colorJugadores[1]);
                 else
                     Console.Write("-");
                 
@@ -114,18 +124,15 @@ class Program {
         Console.Write(msg);
         Console.ResetColor();
     }
-    /* E S T O  Y A  V A  J A L A N D O  B I E N */
 
-    /* R E V I S A R */
     static void PrintColors(ConsoleColor[] colors) {
         int i = 1;
         foreach (ConsoleColor color in colors) {
             Console.Write($"{i}.");
-            Console.ForegroundColor = color;
-            Console.WriteLine(color);
+            ImprimirColor(color.ToString()+" ", color);
             i++;
-            Console.ResetColor();
         }
+        Console.WriteLine();
     }
     static void PedirCoordenadas(string[,] tablero, int jugador, ConsoleColor[] colorJugadores) {
         Console.Write("Ingrese la fila-columna (a1): ");
@@ -134,20 +141,19 @@ class Program {
         int columna = pos[0]-65;
         int fila = Int32.Parse(pos[1].ToString())-1;
 
-        if (EsMovimientoValido(tablero, fila, columna)) {// Validar si el movimiento es valido que coloque la ficha
+        if (EsMovimientoValido(tablero, fila, columna)) {
             ColocarFicha(tablero, fila, columna, jugador, colorJugadores);
+            Reversi(tablero, fila, columna);
         } else {
             Console.WriteLine("Movimiento inválido... Intente nuevamente.");
             PedirCoordenadas(tablero, jugador, colorJugadores);
         }
     }
     static bool EsMovimientoValido(string[,] tablero, int fila, int columna) {
-        Console.WriteLine($"Fila: {fila}");
-        Console.WriteLine($"Columna: {columna}");
         if(!(fila >= 0 && fila <=7) || !(columna >= 0 && columna <=7))
             return false;
 
-       return tablero[fila,columna] == null;
+    return tablero[fila,columna] == null;
     }
 
     static void ColocarFicha(string[,] tablero, int fila, int columna, int jugador, ConsoleColor[] colorJugadores) {
@@ -177,54 +183,84 @@ class Program {
         return contador;
     }
 
-
-    /* R E V I S A R */
-
-    /* P E N D I E N T E */
-    // static void Coordinates(char posx, int posy, int initPosx, int initPosy)
-    // {
-    //     int numPosx = posx - 64;
-
-    //     Console.SetCursorPosition(numPosx+initPosx, posy+initPosy);
-
-    // }
-
-    // static void PrintFicha(ConsoleColor color, int jugador)
-    // {
-    //     Console.ForegroundColor = color;
-    //     if(jugador == 1)
-    //         Console.Write("X");
-    //     else
-    //         Console.Write("O");
-    //     Console.ResetColor();
-    // }
-
     static void Reversi(string[,] tablero, int ultimaFila, int ultimaColumna)
     {
         string[,] t = tablero;
         int f = ultimaFila;
         int c = ultimaColumna;
 
-        string jugador = tablero[f,c];
+        string jugador = t[f,c];
 
-        if(EsMovimientoValido(t, f, c-1)){
+        //up, down, left right
+        string[] direcciones = ["u", "d", "l", "r"];
+        
+        foreach (string dir in direcciones)
+        {
+            EncontrarPareja(t,jugador,f, c, dir);
+
+        }
+
+    }
+
+    static Boolean EncontrarPareja(String[,] tablero, String jugador, int f, int c, String direccion)
+    {
+        int x = 0, y = 0;
+
+        switch (direccion.ToLower())
+        {
+            case "u": y=-1; break;
+            case "d": y=1; break;
+            case "l": x=-1; break;
+            case "r": x=1; break;
+            default: 
+                Console.WriteLine("Error direccion:"+direccion); 
+                break;
+        }
+
+        String siguienteCasilla;
+        String jugadorReversa = JugadorReversa(jugador);
+        try
+        {
+            siguienteCasilla = tablero[f+y,c+x];
             
         }
-        if(EsMovimientoValido(t, f, c+1)){}
-        if(EsMovimientoValido(t, f-1, c)){}
-        if(EsMovimientoValido(t, f+1, c)){}
+        catch (System.Exception)
+        {
+            return false;
+        }
 
+        // o jugador, o nulo
+        if(siguienteCasilla == null)
+            return false;
+
+        if(siguienteCasilla == jugadorReversa)
+            if(EncontrarPareja(tablero, jugador, f+y, c+x, direccion)){
+                tablero[f+y,c+x] = jugador;
+                Reversi(tablero, f+y, c+x);
+                return true;
+            }
+        // 
+        return jugador == siguienteCasilla;
+
+    }
+
+        
+    static String JugadorReversa(String simbolo)
+    {
+        return Jugador(NumJugador(simbolo)+1);
     }
 
     static String Jugador(int i)
     {
-        switch (i)
+        switch (i%2)
         {
             case 0: return "X";
             case 1: return "O";
             default: return "-";
         }
     }
+    
+    
     static int NumJugador(String simbolo)
     {
         switch (simbolo[0])
@@ -234,6 +270,6 @@ class Program {
             default: return -1;
         }
     }
-    /* P E N D I E N T E */
+
 
 }
