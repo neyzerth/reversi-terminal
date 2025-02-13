@@ -12,77 +12,97 @@ namespace reversi;
 class Program {
     static void Main(String[] args) 
     {
-
-
-
-        ConsoleColor[] colors = [
-            ConsoleColor.Red,
-            ConsoleColor.Blue,
-            ConsoleColor.Magenta,
-            ConsoleColor.Yellow,
-            ConsoleColor.Green,
-            ConsoleColor.Cyan
-        ];
-        
-        ConsoleColor[] colorJugadores = new ConsoleColor[2];
-        string[] nombres = new string[2];
-        string[,] tablero = new string[8, 8];
-        
-        for (int i = 0; i < 2; i++) {
-            String error = "Ingresa un valor valido";
-            Console.Clear();
-
-            Console.Write($"Ingresa el nombre del jugador {i + 1}: ");
-            nombres[i] = Console.ReadLine().ToUpper();
-            Console.Clear();
+        do
+        {
+            ConsoleColor[] colorJugadores = new ConsoleColor[2];
+            string[] nombres = new string[2];
+            string[,] tablero = new string[8, 8];
             
-            Console.WriteLine($"{nombres[i]}, selecciona un color: ");
-            ImprimirColores(colors);
-            Console.Write("> ");
+            for (int i = 0; i < 2; i++) {
+                Console.Clear();
 
-            do {
-                try
-                {
-                    int index = Int32.Parse(Console.ReadLine());
+                Console.Write($"Ingresa el nombre del jugador {i + 1}: ");
+                nombres[i] = Console.ReadLine().ToUpper();
+                //Console.Clear();
+                
+                colorJugadores[i] = PedirColor($"{nombres[i]}, selecciona un color: ", colorJugadores[0]);
+                Console.Write("> ");        
+            }
 
-                    if(index < 1 || index > colors.Length)
-                        throw new Exception();
+            InicializarTablero(tablero);
 
-                    colorJugadores[i] = colors[index-1];
+            Jugar(tablero, nombres, colorJugadores);
+    
+            JuegoTerminado(tablero, nombres, colorJugadores);
 
-                    if(colorJugadores[0] == colorJugadores[1]) 
-                    {
-                        error = "Este color ya ha sido seleccionado";
-                        throw new Exception();
-                    }
-                    break;
-                }
-                catch (System.Exception)
-                {
-                    Console.SetCursorPosition(2, 3);
-                    Console.WriteLine(Spaces(10));
-                    Console.WriteLine(error);
-                    Console.SetCursorPosition(2, 3);
-                }
+        } while (ValidarContinuacion());
+        Console.WriteLine("Adios :)");
 
-            } while(true);
+    }
+
+    // ----TABLERO
+    static void InicializarTablero(string[,] tablero) 
+    {
+        //Centro
+        tablero[3,3] = "X";
+        tablero[4,4] = "X";
+        tablero[3,4] = "O";
+        tablero[4,3] = "O";
+
+        //Esquinas
+        tablero[0,0] = "X";
+        tablero[7,7] = "X";
+        tablero[0,7] = "O";
+        tablero[7,0] = "O";
+
+    }
+    static void ImprimirTablero(string[,] tablero, ConsoleColor[] colorJugadores) 
+    {
         
+        Console.WriteLine("\n  A B C D E F G H");
+
+        for (int i = 0; i < 8; i++) {
+            Console.Write(i+1);
+
+            for (int j = 0; j < 8; j++) {
+                Console.Write(" ");
+
+
+                if (tablero[i, j] == "X") 
+                    ImprimirColor("0", colorJugadores[0]);
+                else if (tablero[i, j] == "O")
+                    ImprimirColor("0", colorJugadores[1]);
+                else
+                    Console.Write("-");
+                
+            }
+
+            Console.WriteLine();
         }
+    }
 
-        InicializarTablero(tablero);
-
+    // ----JUEGO
+    static void Jugar(string[,] tablero, string[] nombres, ConsoleColor[] colorJugadores)
+    {
         bool juegoTerminado;
         
         int jugadorActual = 0;
-
         Console.Clear();
+
+        Console.SetCursorPosition(25,2);
+        Console.Write("Ingresa cordenadas en formato Letra/Numero\n");
+
+        Console.SetCursorPosition(25,3);
+        Console.Write("Ejemplo: A4, hf6, b1\n");
+
+        Console.SetCursorPosition(0,12);
         do {
             
             Console.SetCursorPosition(0,0);
             Console.Write(Spaces(Console.WindowWidth));
             Console.SetCursorPosition(0,0);
-
-            ImprimirColor($"Turno de {nombres[jugadorActual]} [{Jugador(jugadorActual)}]\n", colorJugadores[jugadorActual]);
+            // [{Jugador(jugadorActual)}]
+            ImprimirColor($"\tTurno de {nombres[jugadorActual]}\n", colorJugadores[jugadorActual]);
             ImprimirTablero(tablero, colorJugadores);
 
             PedirCoordenadas(tablero, jugadorActual, colorJugadores);
@@ -91,7 +111,10 @@ class Program {
             juegoTerminado = !HayMovimientosDisponibles(tablero);
 
         } while (!juegoTerminado);
+    }
 
+    static void JuegoTerminado(string[,] tablero, string[] nombres, ConsoleColor[] colorJugadores)
+    {
         int fichasJugador1 = ContarFichas(tablero, 0);
         int fichasJugador2 = ContarFichas(tablero, 1);
 
@@ -114,171 +137,12 @@ class Program {
         Console.WriteLine("\nFin del juego!");
         ImprimirColor($"{nombres[0]}: {fichasJugador1} fichas.", colorJugadores[0]); 
         ImprimirColor($"\n{nombres[1]}: {fichasJugador2} fichas.", colorJugadores[1]);
-
-    }
-
-    static String Spaces(int cant)
-    {
-        String space = "";
-        for (int i = 0; i < cant; i++)
-        {
-            space += " ";
-        }
-        return space;
-    }
-
-    static void InicializarTablero(string[,] tablero) 
-    {
-        // tablero[3,3] = "X";
-        // tablero[3,4] = "O";
-        // tablero[4,3] = "O";
-        // tablero[4,4] = "X";
-
-        string[,] initialTablero = {
-            {"X", "X", "X", "X", "X", "X", "X", "X"},
-            {"X", "X", "X", "X", "X", "X", "X", "X"},
-            {"X", "X", "X", "X", "X", "X", "X", "X"},
-            {"O", "O", "O", "O", "O", "O", "O", null},
-            {"O", "O", "O", "O", "O", "O", "O", "O"},
-            {"O", "O", "O", "O", "O", "O", "O", "O"},
-            {"O", "O", "O", "O", "O", "O", "O", "O"},
-            {"O", "O", "O", "O", "O", "O", "O", "O"}
-        };
-        Array.Copy(initialTablero, tablero, initialTablero.Length);
-
-
-    }
-    static void ImprimirTablero(string[,] tablero, ConsoleColor[] colorJugadores) 
-    {
-        
-        Console.WriteLine("\n  A B C D E F G H");
-
-        for (int i = 0; i < 8; i++) {
-            Console.Write(i+1);
-
-            for (int j = 0; j < 8; j++) {
-                Console.Write(" ");
-
-
-                if (tablero[i, j] == "X") 
-                    ImprimirColor("X", colorJugadores[0]);
-                else if (tablero[i, j] == "O")
-                    ImprimirColor("O", colorJugadores[1]);
-                else
-                    Console.Write("-");
-                
-            }
-
-            Console.WriteLine();
-        }
-    }
-
-    static void ImprimirColor(String msg, ConsoleColor color)
-    {
-        Console.ForegroundColor = color;
-        Console.Write(msg);
-        Console.ResetColor();
-    }
-
-    static void ImprimirColores(ConsoleColor[] colors) 
-    {
-        int i = 1;
-        foreach (ConsoleColor color in colors) 
-        {
-            Console.Write($"{i}.");
-            ImprimirColor(color.ToString()+" ", color);
-
-            if(i==3) Console.WriteLine();
-
-            i++;
-        }
-
-        Console.WriteLine();
-    }
-    
-
-    static void PedirCoordenadas(string[,] tablero, int jugador, ConsoleColor[] colorJugadores) 
-    {
-        int columna = 0, fila = 0;
-        String pos = "";
-        String msg = "";
-
-        Console.SetCursorPosition(0,12);
-        Console.Write("> ");
-
-
-        do
-        {
-
-            Console.SetCursorPosition(2,12);
-            Console.Write(Spaces(pos.Length));
-            Console.SetCursorPosition(2,12);
-            Console.ForegroundColor = colorJugadores[jugador];
-            pos = Console.ReadLine().ToUpper();
-            
-            Console.ResetColor();
-            try
-            {            
-                columna = pos[0]-65;
-                fila = Int32.Parse(pos[1].ToString())-1;
-
-                if (!EsMovimientoValido(tablero, fila, columna)) {
-                    throw new Exception();
-                }
-            }
-            catch (System.Exception)
-            {
-                Console.SetCursorPosition(25,6);
-                msg = "Movimiento inválido... Intente nuevamente.";
-                Console.Write(msg);
-                Console.SetCursorPosition(0,12);
-                continue;
-            }
-            
-            ColocarFicha(tablero, fila, columna, jugador);
-            Reversi(tablero, fila, columna);    
-            
-            
-            Console.SetCursorPosition(25,6);
-            Console.Write(Spaces(msg.Length));
-            Console.SetCursorPosition(0,12);
-            Console.Write(Spaces(10));
-            Console.SetCursorPosition(0,12);
-            break;
-        } while (true);
     }
     static bool EsMovimientoValido(string[,] tablero, int fila, int columna) {
         if(!(fila >= 0 && fila <=7) || !(columna >= 0 && columna <=7))
             return false;
 
         return tablero[fila,columna] == null;
-    }
-
-    static void ColocarFicha(string[,] tablero, int fila, int columna, int jugador) {
-        String[] simbolos = ["X","O"];
-        tablero[fila,columna] = simbolos[jugador];
-    }
-    static bool HayMovimientosDisponibles(string[,] tablero) {
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                if (EsMovimientoValido(tablero, i, j)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-    static int ContarFichas(string[,] tablero, int jugador) {
-        int contador = 0;
-        string fichaJugador = Jugador(jugador);
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                if (tablero[i, j] == fichaJugador) {
-                    contador++;
-                }
-            }
-        }
-        return contador;
     }
 
     static void Reversi(string[,] tablero, int ultimaFila, int ultimaColumna)
@@ -340,7 +204,169 @@ class Program {
 
     }
 
+    static void ColocarFicha(string[,] tablero, int fila, int columna, int jugador) {
+        String[] simbolos = ["X","O"];
+        tablero[fila,columna] = simbolos[jugador];
+    }
+    
+    //---DATOS
+
+    static ConsoleColor PedirColor(String msg, ConsoleColor? noUsar)
+    {
+        ConsoleColor[] colors = [
+            ConsoleColor.Red,
+            ConsoleColor.Blue,
+            ConsoleColor.Magenta,
+            ConsoleColor.Green,
+            ConsoleColor.Cyan,
+            ConsoleColor.Yellow
+        ];
+
+        ConsoleColor color;
+
+
+        Console.WriteLine(msg);
+        ImprimirColores(colors, noUsar);
+        Console.Write("> ");
+
+        do {
+            String error = "Ingresa una opcion valido";
+            try
+            {
+                int index = Int32.Parse(Console.ReadLine());
+
+                if(index < 1 || index > colors.Length)
+                    throw new Exception();
+
+                color = colors[index-1];
+
+                if(color == noUsar) 
+                {
+                    error = "Este color ya ha sido seleccionado";
+                    throw new Exception();
+                }
+                break;
+            }
+            catch (System.Exception)
+            {
+                Console.SetCursorPosition(2, 3);
+                Console.WriteLine(Spaces(10));
+                Console.WriteLine(error);
+                Console.SetCursorPosition(2, 3);
+            }
+
+        } while(true);
+
+        return color;
         
+        
+    }
+    static void PedirCoordenadas(string[,] tablero, int jugador, ConsoleColor[] colorJugadores) 
+    {
+        int columna, fila;
+        String pos = "";
+        String msg = "";
+
+        Console.SetCursorPosition(0,12);
+        Console.Write("> ");
+
+
+        do
+        {
+
+            Console.SetCursorPosition(2,12);
+            Console.Write(Spaces(pos.Length));
+            Console.SetCursorPosition(2,12);
+            Console.ForegroundColor = colorJugadores[jugador];
+            pos = Console.ReadLine().ToUpper();
+            
+            Console.ResetColor();
+            try
+            {            
+                columna = pos[0]-65;
+                fila = Int32.Parse(pos[1].ToString())-1;
+
+                if (!EsMovimientoValido(tablero, fila, columna)) {
+                    throw new Exception();
+                }
+            }
+            catch (System.Exception)
+            {
+                Console.SetCursorPosition(25,6);
+                msg = "Movimiento inválido... Intente nuevamente.";
+                Console.Write(msg);
+                Console.SetCursorPosition(0,12);
+                continue;
+            }
+            
+            ColocarFicha(tablero, fila, columna, jugador);
+            Reversi(tablero, fila, columna);    
+            
+            
+            Console.SetCursorPosition(25,6);
+            Console.Write(Spaces(msg.Length));
+            Console.SetCursorPosition(0,12);
+            Console.Write(Spaces(10));
+            Console.SetCursorPosition(0,12);
+            break;
+        } while (true);
+    }
+ 
+
+    static void ImprimirColor(String msg, ConsoleColor color)
+    {
+        Console.ForegroundColor = color;
+        Console.Write(msg);
+        Console.ResetColor();
+    }
+
+    static void ImprimirColores(ConsoleColor[] colors, ConsoleColor? noUsar) 
+    {
+        int i = 1;
+        foreach (ConsoleColor color in colors) 
+        {
+            if(noUsar == color) 
+            {
+                i++;
+                continue;
+            }
+
+            Console.Write($"{i}.");
+            ImprimirColor(color.ToString()+"\t", color);
+
+            if(i==3) Console.WriteLine();
+
+            i++;
+        }
+
+        Console.WriteLine();
+    }
+    
+    //---TERMINAR JUEGO
+    static bool HayMovimientosDisponibles(string[,] tablero) {
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (EsMovimientoValido(tablero, i, j)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    static int ContarFichas(string[,] tablero, int jugador) {
+        int contador = 0;
+        string fichaJugador = Jugador(jugador);
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (tablero[i, j] == fichaJugador) {
+                    contador++;
+                }
+            }
+        }
+        return contador;
+    }
+  
+    //---Jugador        
     static String JugadorReversa(String simbolo)
     {
         return Jugador(NumJugador(simbolo)+1);
@@ -356,7 +382,6 @@ class Program {
         }
     }
     
-    
     static int NumJugador(String simbolo)
     {
         switch (simbolo[0])
@@ -367,5 +392,46 @@ class Program {
         }
     }
 
+    static String Spaces(int cant)
+    {
+        String space = "";
+        for (int i = 0; i < cant; i++)
+        {
+            space += " ";
+        }
+        return space;
+    }
+
+
+
+static bool ValidarContinuacion()
+    {
+        String respuesta;
+        bool validacion;
+
+        Console.Write("\n\t¿Desea realizar otro juego? (S/n): ");
+
+        // guardar posicion del cursor antes de leer el numero
+        int posx = Console.CursorLeft;
+        int posy = Console.CursorTop;
+
+        do{
+            // borrar lo que se haya escrito por teclado
+            PrintXY(posx, posy, Spaces(Console.WindowWidth));
+            PrintXY(posx, posy, "");
+            respuesta = Console.ReadLine().ToLower();
+
+            //validar que escribio S o N
+            validacion = respuesta.Equals("s") || respuesta.Equals("n");
+        } while (!validacion);
+
+        return respuesta.Equals("s");
+    }
+
+    static void PrintXY(int x, int y, string text)
+    {
+        Console.SetCursorPosition(x,y);
+        Console.Write(text);
+    }  
 
 }
