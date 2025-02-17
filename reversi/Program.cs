@@ -23,7 +23,7 @@ class Program {
 
                 Console.Write($"Ingresa el nombre del jugador {i + 1}: ");
                 nombres[i] = Console.ReadLine().ToUpper();
-                //Console.Clear();
+                Console.Clear();
                 
                 colorJugadores[i] = PedirColor($"{nombres[i]}, selecciona un color: ", colorJugadores[0]);
                 Console.Write("> ");        
@@ -36,6 +36,7 @@ class Program {
             JuegoTerminado(tablero, nombres, colorJugadores);
 
         } while (ValidarContinuacion());
+
         Console.WriteLine("Adios :)");
 
     }
@@ -54,6 +55,17 @@ class Program {
         tablero[7,7] = "X";
         tablero[0,7] = "O";
         tablero[7,0] = "O";
+
+        //Test
+        // for (int i = 0; i < 8; i++)
+        // {
+        //     for (int j = 0; j < 8; j++)
+        //     {
+        //         if(tablero[i,j] == null && i != 3)
+        //             tablero[i,j] = Jugador(i);
+        //     }
+            
+        // }
 
     }
     static void ImprimirTablero(string[,] tablero, ConsoleColor[] colorJugadores) 
@@ -93,7 +105,7 @@ class Program {
         Console.Write("Ingresa cordenadas en formato Letra/Numero\n");
 
         Console.SetCursorPosition(25,3);
-        Console.Write("Ejemplo: A4, hf6, b1\n");
+        Console.Write("Ejemplo: A4, f6, b1\n");
 
         Console.SetCursorPosition(0,12);
         do {
@@ -119,7 +131,7 @@ class Program {
         int fichasJugador2 = ContarFichas(tablero, 1);
 
         Console.SetCursorPosition(0,0);
-        Console.WriteLine(Spaces(Console.WindowWidth));
+        Console.Write(Spaces(Console.WindowWidth));
         if (fichasJugador1 > fichasJugador2)
         {
             ImprimirColor($"{nombres[0]} gana!\n", colorJugadores[0]);
@@ -210,6 +222,13 @@ class Program {
     }
     
     //---DATOS
+
+    static void ImprimirColor(String msg, ConsoleColor color)
+    {
+        Console.ForegroundColor = color;
+        Console.Write(msg);
+        Console.ResetColor();
+    }
 
     static ConsoleColor PedirColor(String msg, ConsoleColor? noUsar)
     {
@@ -311,14 +330,6 @@ class Program {
             break;
         } while (true);
     }
- 
-
-    static void ImprimirColor(String msg, ConsoleColor color)
-    {
-        Console.ForegroundColor = color;
-        Console.Write(msg);
-        Console.ResetColor();
-    }
 
     static void ImprimirColores(ConsoleColor[] colors, ConsoleColor? noUsar) 
     {
@@ -402,36 +413,34 @@ class Program {
         return space;
     }
 
+    static bool ValidarContinuacion()
+        {
+            String respuesta;
+            bool validacion;
 
+            Console.Write("\n¿Desea realizar otro juego? (S/n): ");
 
-static bool ValidarContinuacion()
-    {
-        String respuesta;
-        bool validacion;
+            // guardar posicion del cursor antes de leer el numero
+            int posx = Console.CursorLeft;
+            int posy = Console.CursorTop;
 
-        Console.Write("\n\t¿Desea realizar otro juego? (S/n): ");
+            do{
+                // borrar lo que se haya escrito por teclado
+                PrintXY(posx, posy, Spaces(Console.WindowWidth));
+                PrintXY(posx, posy, "");
+                respuesta = Console.ReadLine().ToLower();
 
-        // guardar posicion del cursor antes de leer el numero
-        int posx = Console.CursorLeft;
-        int posy = Console.CursorTop;
+                //validar que escribio S o N
+                validacion = respuesta.Equals("s") || respuesta.Equals("n");
+            } while (!validacion);
 
-        do{
-            // borrar lo que se haya escrito por teclado
-            PrintXY(posx, posy, Spaces(Console.WindowWidth));
-            PrintXY(posx, posy, "");
-            respuesta = Console.ReadLine().ToLower();
-
-            //validar que escribio S o N
-            validacion = respuesta.Equals("s") || respuesta.Equals("n");
-        } while (!validacion);
-
-        return respuesta.Equals("s");
-    }
+            return respuesta.Equals("s");
+        }
 
     static void PrintXY(int x, int y, string text)
-    {
-        Console.SetCursorPosition(x,y);
-        Console.Write(text);
-    }  
+{
+    Console.SetCursorPosition(x,y);
+    Console.Write(text);
+}  
 
 }
