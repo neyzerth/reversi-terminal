@@ -12,6 +12,7 @@ namespace reversi;
 class Program {
     static void Main(String[] args) 
     {
+        Console.Title = "Reversi";
         do
         {
             ConsoleColor[] colorJugadores = new ConsoleColor[2];
